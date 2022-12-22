@@ -6,6 +6,8 @@ namespace LightController
 {
     public class LightController
     {
+        public static event Action<Light> OnLightAdded;
+
         private List<Light> _lights = new List<Light>();
         private int _lightCount;
         private bool _lightOn;
@@ -21,8 +23,15 @@ namespace LightController
             ClearLights();
             for (int i = 0; i < number; i++)
             {
-                _lights.Add(new Light());
+                AddLight(i);
             }
+        }
+
+        private void AddLight(int position)
+        {
+            Light light = new Light(position);
+            _lights.Add(light);
+            OnLightAdded?.Invoke(light);
         }
 
         private void ClearLights()
@@ -98,16 +107,23 @@ namespace LightController
 
     public class Light : EventListener<FadeInEvent>, EventListener<FadeOutEvent>
     {
+        private int _position;
         private bool _isFading = false;
         public Color Color { get; set; }
         public bool IsOn { get; set; }
 
-        public Light()
+        public Light(int position)
         {
+            _position = position;
             EventRegister.EventStartListening<FadeInEvent>(this);
             EventRegister.EventStartListening<FadeOutEvent>(this);
             Color = Color.White;
             IsOn = false;
+        }
+
+        public int GetPosition()
+        {
+            return _position;
         }
 
         public void Remove()
