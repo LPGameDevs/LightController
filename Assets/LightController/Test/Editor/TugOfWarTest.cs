@@ -229,7 +229,6 @@ namespace LightController.Test
         {
             // Start the game.
             TugOfWarGame game = new TugOfWarGame(10);
-            LightController lightController = game.GetLightController();
 
             game.AddPlayerTeamLeft();
             game.AddPlayerTeamLeft();
@@ -241,6 +240,8 @@ namespace LightController.Test
 
             Assert.AreEqual(true, game.IsGameOver());
 
+            Assert.Throws<TugOfWarGame.GameOverException>(
+                () => { game.Move(); });
         }
     }
 }

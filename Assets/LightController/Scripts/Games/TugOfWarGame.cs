@@ -79,7 +79,7 @@ namespace LightController.Games
             _playerCountRight++;
         }
 
-        private List<int> GetWinningSpaces()
+        public List<int> GetWinningSpaces()
         {
             List<int> winningSpaces = new List<int>();
             if (_totalSpaces % 2 == 0)
@@ -140,6 +140,11 @@ namespace LightController.Games
             if (GetNumberOfPlayersLeft() == 0 || GetNumberOfPlayersRight() == 0)
             {
                 throw new NotEnoughTeamsException();
+            }
+
+            if (IsGameOver())
+            {
+                throw new GameOverException();
             }
 
             Team winner = GetWinner();
@@ -210,6 +215,11 @@ namespace LightController.Games
         public class TeamIsFullException : Exception
         {
         }
+
+        public class GameOverException : Exception
+        {
+        }
     }
+
 
 }
