@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LightController.Games
 {
@@ -53,8 +55,8 @@ namespace LightController.Games
                 throw new TeamIsFullException();
             }
 
-            int middle = (int) Math.Floor((double) (_totalSpaces - 1) / 2);
-            int position = middle - 1 - GetNumberOfPlayersLeft();
+            List<int> winningSpaces = GetWinningSpaces();
+            int position = winningSpaces.Min() - 1 - GetNumberOfPlayersLeft();
             AddPlayer();
             _lightController.TurnOnLight(position);
             _playerCountLeft++;
@@ -70,11 +72,27 @@ namespace LightController.Games
                 throw new TeamIsFullException();
             }
 
-            int middle = (int) Math.Ceiling((double) (_totalSpaces - 1) / 2);
-            int position = middle + 1 + GetNumberOfPlayersRight();
+            List<int> winningSpaces = GetWinningSpaces();
+            int position = winningSpaces.Max() + 1 + GetNumberOfPlayersRight();
             AddPlayer();
             _lightController.TurnOnLight(position);
             _playerCountRight++;
+        }
+
+        private List<int> GetWinningSpaces()
+        {
+            List<int> winningSpaces = new List<int>();
+            if (_totalSpaces % 2 == 0)
+            {
+                winningSpaces.Add((int) Math.Floor((double) (_totalSpaces - 1) / 2));
+                winningSpaces.Add((int) Math.Ceiling((double) (_totalSpaces - 1) / 2));
+            }
+            else
+            {
+                winningSpaces.Add((_totalSpaces - 1) / 2);
+            }
+
+            return winningSpaces;
         }
 
         public int GetNumberOfPlayersLeft()
@@ -123,6 +141,62 @@ namespace LightController.Games
             {
                 throw new NotEnoughTeamsException();
             }
+
+            Team winner = GetWinner();
+            if (winner == Team.None)
+            {
+                return;
+                // throw new GameIsTiedException();
+            }
+
+            // Get players.
+            List<int> players = new List<int>();
+            for (int i = 0; i < _lightController.GetNumberOfLights(); i++)
+            {
+                if (_lightController.IsLightOn(i))
+                {
+                    players.Add(i);
+                }
+            }
+
+            if (winner == Team.Left)
+            {
+                foreach (int player in players)
+                {
+                    _lightController.TurnOffLight(player);
+                }
+
+                foreach (int player in players)
+                {
+                    _lightController.TurnOnLight(player - 1);
+                }
+            }
+            else
+            {
+                foreach (int player in players)
+                {
+                    _lightController.TurnOffLight(player);
+                }
+
+                foreach (int player in players)
+                {
+                    _lightController.TurnOnLight(player + 1);
+                }
+            }
+        }
+
+        public bool IsGameOver()
+        {
+            List<int> winningSpaces = GetWinningSpaces();
+            foreach (int winningSpace in winningSpaces)
+            {
+                if (_lightController.IsLightOn(winningSpace))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public class NotEnoughPlayersException : Exception

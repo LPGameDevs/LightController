@@ -136,11 +136,111 @@ namespace LightController.Test
             Assert.Throws<TugOfWarGame.NotEnoughTeamsException>(
                 () => { game.Move(); });
 
+
             // Add player right.
             game.AddPlayerTeamRight();
+
+            // Check player positions.
+            Assert.AreEqual(false, lightController.IsLightOn(1));
+            Assert.AreEqual(true, lightController.IsLightOn(2));
+            Assert.AreEqual(true, lightController.IsLightOn(3));
+            Assert.AreEqual(false, lightController.IsLightOn(4));
+            Assert.AreEqual(false, lightController.IsLightOn(5));
+            Assert.AreEqual(true, lightController.IsLightOn(6));
+            Assert.AreEqual(false, lightController.IsLightOn(7));
+
             game.Move();
+
+            // Check players have moved to the left.
+            Assert.AreEqual(true, lightController.IsLightOn(1));
+            Assert.AreEqual(true, lightController.IsLightOn(2));
+            Assert.AreEqual(false, lightController.IsLightOn(3));
+            Assert.AreEqual(false, lightController.IsLightOn(4));
+            Assert.AreEqual(true, lightController.IsLightOn(5));
+            Assert.AreEqual(false, lightController.IsLightOn(6));
+            Assert.AreEqual(false, lightController.IsLightOn(7));
+
+            // Setup new game with draw outcome.
+            game = new TugOfWarGame(10);
+            lightController = game.GetLightController();
+            game.AddPlayerTeamLeft();
+            game.AddPlayerTeamLeft();
+            game.AddPlayerTeamRight();
+            game.AddPlayerTeamRight();
+
+            // Check starting positions.
+            Assert.AreEqual(false, lightController.IsLightOn(1));
+            Assert.AreEqual(true, lightController.IsLightOn(2));
+            Assert.AreEqual(true, lightController.IsLightOn(3));
+            Assert.AreEqual(false, lightController.IsLightOn(4));
+            Assert.AreEqual(false, lightController.IsLightOn(5));
+            Assert.AreEqual(true, lightController.IsLightOn(6));
+            Assert.AreEqual(true, lightController.IsLightOn(7));
+            Assert.AreEqual(false, lightController.IsLightOn(8));
+
+            game.Move();
+
+            // Check no movement
+            Assert.AreEqual(false, lightController.IsLightOn(1));
+            Assert.AreEqual(true, lightController.IsLightOn(2));
+            Assert.AreEqual(true, lightController.IsLightOn(3));
+            Assert.AreEqual(false, lightController.IsLightOn(4));
+            Assert.AreEqual(false, lightController.IsLightOn(5));
+            Assert.AreEqual(true, lightController.IsLightOn(6));
+            Assert.AreEqual(true, lightController.IsLightOn(7));
+            Assert.AreEqual(false, lightController.IsLightOn(8));
+
+            // Setup new game with right team win outcome.
+            game = new TugOfWarGame(10);
+            lightController = game.GetLightController();
+            game.AddPlayerTeamLeft();
+            game.AddPlayerTeamLeft();
+            game.AddPlayerTeamRight();
+            game.AddPlayerTeamRight();
+            game.AddPlayerTeamRight();
+
+            // Check starting positions.
+            Assert.AreEqual(false, lightController.IsLightOn(1));
+            Assert.AreEqual(true, lightController.IsLightOn(2));
+            Assert.AreEqual(true, lightController.IsLightOn(3));
+            Assert.AreEqual(false, lightController.IsLightOn(4));
+            Assert.AreEqual(false, lightController.IsLightOn(5));
+            Assert.AreEqual(true, lightController.IsLightOn(6));
+            Assert.AreEqual(true, lightController.IsLightOn(7));
+            Assert.AreEqual(true, lightController.IsLightOn(8));
+            Assert.AreEqual(false, lightController.IsLightOn(9));
+
+            game.Move();
+
+            // Check movement to the right.
+            Assert.AreEqual(false, lightController.IsLightOn(1));
+            Assert.AreEqual(false, lightController.IsLightOn(2));
+            Assert.AreEqual(true, lightController.IsLightOn(3));
+            Assert.AreEqual(true, lightController.IsLightOn(4));
+            Assert.AreEqual(false, lightController.IsLightOn(5));
+            Assert.AreEqual(false, lightController.IsLightOn(6));
+            Assert.AreEqual(true, lightController.IsLightOn(7));
+            Assert.AreEqual(true, lightController.IsLightOn(8));
+            Assert.AreEqual(true, lightController.IsLightOn(9));
         }
 
+        [Test]
+        public void TestTowWin()
+        {
+            // Start the game.
+            TugOfWarGame game = new TugOfWarGame(10);
+            LightController lightController = game.GetLightController();
 
+            game.AddPlayerTeamLeft();
+            game.AddPlayerTeamLeft();
+            game.AddPlayerTeamRight();
+
+            Assert.AreEqual(false, game.IsGameOver());
+
+            game.Move();
+
+            Assert.AreEqual(true, game.IsGameOver());
+
+        }
     }
 }
