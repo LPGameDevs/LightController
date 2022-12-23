@@ -16,6 +16,16 @@ public class GameController : MonoBehaviour
         _game = new TugOfWarGame(StripSize);
         _lightController = _game.GetLightController();
 
+        SetWinningSpaces();
+    }
+
+    private void SetWinningSpaces()
+    {
+        if (_game == null)
+        {
+            return;
+        }
+
         foreach (int winningSpace in _game.GetWinningSpaces())
         {
             OnSetSpecialPosition?.Invoke(winningSpace);
@@ -46,6 +56,11 @@ public class GameController : MonoBehaviour
         }
     }
 
+    private void OnResetBoard()
+    {
+        SetWinningSpaces();
+    }
+
     public void Move()
     {
         try
@@ -56,5 +71,15 @@ public class GameController : MonoBehaviour
         {
             Debug.Log(e);
         }
+    }
+
+    private void OnEnable()
+    {
+        LightController.LightController.OnResetBoard += OnResetBoard;
+    }
+
+    private void OnDisable()
+    {
+        LightController.LightController.OnResetBoard -= OnResetBoard;
     }
 }

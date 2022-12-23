@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using LightController.Games;
 using NUnit.Framework;
 
@@ -62,8 +63,9 @@ namespace LightController.Test
             game.AddPlayerTeamLeft();
         }
 
-        [TestCase(10, 3, 6)]
-        [TestCase(9, 3, 5)]
+        [TestCase(13, 3, 9)]
+        [TestCase(10, 2, 7)]
+        [TestCase(9, 2, 6)]
         [TestCase(5, 1, 3)]
         public void TestTowStartingPositionsTwoPlayers(int totalLights, int player1pos, int player2pos)
         {
@@ -79,31 +81,154 @@ namespace LightController.Test
             Assert.AreEqual(true, lightController.IsLightOn(player2pos));
         }
 
-        [TestCase(10, 3, 6, 2,7,true)]
-        [TestCase(9, 3, 5,2,6, true)]
-        [TestCase(5, 1, 3, 0, 0, false)]
-        public void TestTowStartingPositionsFourPlayers(int totalLights, int player1pos, int player2pos, int player3pos, int player4pos, bool playersWillFit)
+        private static IEnumerable<TestTowStartingPositionsFourPlayersCase> TestTowStartingPositionsFourPlayersCases
         {
-            TugOfWarGame game = new TugOfWarGame(totalLights);
+            get
+            {
+                yield return new TestTowStartingPositionsFourPlayersCase(13, new List<LightChecks>()
+                {
+                    new LightChecks(new List<LightCheck>()
+                    {
+                        new LightCheck(3,true),
+                        new LightCheck(4,false),
+                        new LightCheck(8,false),
+                        new LightCheck(9,false),
+                    }),
+                    new LightChecks(new List<LightCheck>()
+                    {
+                        new LightCheck(3,true),
+                        new LightCheck(4,false),
+                        new LightCheck(8,false),
+                        new LightCheck(9,true),
+                    }),
+                    new LightChecks(new List<LightCheck>()
+                    {
+                    new LightCheck(3,true),
+                    new LightCheck(4,true),
+                    new LightCheck(8,true),
+                    new LightCheck(9,false),
+                    }),
+                    new LightChecks(new List<LightCheck>()
+                    {
+                        new LightCheck(3,true),
+                        new LightCheck(4,true),
+                        new LightCheck(8,true),
+                        new LightCheck(9,true),
+                    })
+                }, true);
+                yield return new TestTowStartingPositionsFourPlayersCase(10, new List<LightChecks>()
+                {
+                    new LightChecks(new List<LightCheck>()
+                    {
+                        new LightCheck(2,true),
+                        new LightCheck(3,false),
+                        new LightCheck(6,false),
+                        new LightCheck(7,false),
+                    }),
+                    new LightChecks(new List<LightCheck>()
+                    {
+
+                        new LightCheck(2,true),
+                        new LightCheck(3,false),
+                        new LightCheck(6,false),
+                        new LightCheck(7,true),
+                    }),
+                    new LightChecks(new List<LightCheck>()
+                    {
+
+                        new LightCheck(2,true),
+                        new LightCheck(3,true),
+                        new LightCheck(6,true),
+                        new LightCheck(7,false),
+                    }),
+                    new LightChecks(new List<LightCheck>()
+                    {
+
+                        new LightCheck(2,true),
+                        new LightCheck(3,true),
+                        new LightCheck(6,true),
+                        new LightCheck(7,true),
+                    })
+                }, true);
+                yield return new TestTowStartingPositionsFourPlayersCase(9, new List<LightChecks>()
+                {
+                    new LightChecks(new List<LightCheck>()
+                    {
+                        new LightCheck(2,true),
+                        new LightCheck(3,false),
+                        new LightCheck(5,false),
+                        new LightCheck(6,false),
+                    }),
+                    new LightChecks(new List<LightCheck>()
+                    {
+                        new LightCheck(2,true),
+                        new LightCheck(3,false),
+                        new LightCheck(5,false),
+                        new LightCheck(6,true),
+                    }),
+                    new LightChecks(new List<LightCheck>()
+                    {
+                        new LightCheck(2,true),
+                        new LightCheck(3,true),
+                        new LightCheck(5,true),
+                        new LightCheck(6,false),
+                    }),
+                    new LightChecks(new List<LightCheck>()
+                    {
+                        new LightCheck(2,true),
+                        new LightCheck(3,true),
+                        new LightCheck(5,true),
+                        new LightCheck(6,true),
+                    }),
+                }, true);
+                yield return new TestTowStartingPositionsFourPlayersCase(5, new List<LightChecks>()
+                    {
+                        new LightChecks(new List<LightCheck>()
+                        {
+                            new LightCheck(1,true),
+                            new LightCheck(3,false),
+                        }),
+                        new LightChecks(new List<LightCheck>()
+                        {
+                            new LightCheck(1,true),
+                            new LightCheck(3,true),
+                        }),
+                    }, false);
+            }
+        }
+
+        [Test, TestCaseSource(nameof(TestTowStartingPositionsFourPlayersCases))]
+        public void TestTowStartingPositionsFourPlayers(TestTowStartingPositionsFourPlayersCase testCase)
+        {
+            TugOfWarGame game = new TugOfWarGame(testCase.totalLights);
             LightController lightController = game.GetLightController();
 
-            Assert.AreEqual(false, lightController.IsLightOn(player1pos));
-            Assert.AreEqual(false, lightController.IsLightOn(player2pos));
-            Assert.AreEqual(false, lightController.IsLightOn(player3pos));
-            Assert.AreEqual(false, lightController.IsLightOn(player4pos));
-
             game.AddPlayerTeamLeft();
-            Assert.AreEqual(true, lightController.IsLightOn(player1pos));
-            game.AddPlayerTeamRight();
-            Assert.AreEqual(true, lightController.IsLightOn(player2pos));
+            foreach (LightCheck lightCheck in testCase.lightChecks[0].lightChecks)
+            {
+                Assert.AreEqual(lightCheck.IsOn, lightController.IsLightOn(lightCheck.Position));
+            }
 
-            if (playersWillFit)
+
+            game.AddPlayerTeamRight();
+            foreach (LightCheck lightCheck in testCase.lightChecks[1].lightChecks)
+            {
+                Assert.AreEqual(lightCheck.IsOn, lightController.IsLightOn(lightCheck.Position));
+            }
+
+            if (testCase.playersWillFit)
             {
                 game.AddPlayerTeamLeft();
-                Assert.AreEqual(true, lightController.IsLightOn(player3pos));
-                game.AddPlayerTeamRight();
-                Assert.AreEqual(true, lightController.IsLightOn(player4pos));
+                foreach (LightCheck lightCheck in testCase.lightChecks[2].lightChecks)
+                {
+                    Assert.AreEqual(lightCheck.IsOn, lightController.IsLightOn(lightCheck.Position));
+                }
 
+                game.AddPlayerTeamRight();
+                foreach (LightCheck lightCheck in testCase.lightChecks[3].lightChecks)
+                {
+                    Assert.AreEqual(lightCheck.IsOn, lightController.IsLightOn(lightCheck.Position));
+                }
             }
             else
             {
@@ -113,6 +238,7 @@ namespace LightController.Test
                     () => { game.AddPlayerTeamRight(); });
 
             }
+
         }
 
 
@@ -242,6 +368,44 @@ namespace LightController.Test
 
             Assert.Throws<TugOfWarGame.GameOverException>(
                 () => { game.Move(); });
+        }
+
+
+
+        public struct TestTowStartingPositionsFourPlayersCase
+        {
+            public int totalLights;
+            public List<LightChecks> lightChecks;
+            public bool playersWillFit;
+
+            public TestTowStartingPositionsFourPlayersCase(int totalLights, List<LightChecks> lightChecks, bool playersWillFit)
+            {
+                this.totalLights = totalLights;
+                this.lightChecks = lightChecks;
+                this.playersWillFit = playersWillFit;
+            }
+        }
+
+        public struct LightChecks
+        {
+            public List<LightCheck> lightChecks;
+
+            public LightChecks(List<LightCheck> lightChecks)
+            {
+                this.lightChecks = lightChecks;
+            }
+        }
+
+        public struct LightCheck
+        {
+            public int Position;
+            public bool IsOn;
+
+            public LightCheck(int position, bool isOn)
+            {
+                Position = position;
+                IsOn = isOn;
+            }
         }
     }
 }
