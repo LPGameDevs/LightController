@@ -6,7 +6,9 @@ namespace LightController
 {
     public class LightController
     {
+        public static event Action OnResetBoard;
         public static event Action<Light> OnLightAdded;
+        public static event Action<Light> OnLightRemoved;
 
         private List<Light> _lights = new List<Light>();
         private int _lightCount;
@@ -25,6 +27,7 @@ namespace LightController
             {
                 AddLight(i);
             }
+            OnResetBoard?.Invoke();
         }
 
         private void AddLight(int position)
@@ -38,6 +41,7 @@ namespace LightController
         {
             foreach (Light light in _lights)
             {
+                OnLightRemoved?.Invoke(light);
                 light.Remove();
             }
             _lights.Clear();

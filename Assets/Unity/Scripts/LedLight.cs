@@ -36,6 +36,11 @@ public class LedLight : MonoBehaviour
         _light = light;
     }
 
+    public int GetPosition()
+    {
+        return _light.GetPosition();
+    }
+
     private void SetSpecialPosition(int position)
     {
         if (position != _light.GetPosition())

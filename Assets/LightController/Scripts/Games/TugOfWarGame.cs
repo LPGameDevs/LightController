@@ -23,14 +23,14 @@ namespace LightController.Games
         public TugOfWarGame(int totalSpaces)
         {
             _totalSpaces = totalSpaces;
-            SetupBoard();
             _lightController = new LightController();
-            _lightController.SetLights(totalSpaces);
+            SetupBoard();
         }
 
         public void SetupBoard()
         {
-
+            _lightController.SetLights(_totalSpaces);
+            SetStartingPositions();
         }
 
         public LightController GetLightController()
@@ -47,6 +47,30 @@ namespace LightController.Games
         {
             return _playerCount;
         }
+
+        private void SetStartingPositions()
+        {
+
+            int maxTeamSize = Math.Max(GetNumberOfPlayersLeft(), GetNumberOfPlayersRight());
+            int maxDistanceToWinningSpace = GetMaxDistanceToWinningSpace(maxTeamSize);
+
+            int stepsToWin = Math.Min(3, maxDistanceToWinningSpace);
+
+            for (int i = 0; i < GetNumberOfPlayersLeft(); i++)
+            {
+                List<int> winningSpaces = GetWinningSpaces();
+                int winningSpace = winningSpaces.Min();
+                _lightController.TurnOnLight(winningSpace - stepsToWin - i);
+            }
+
+            for (int i = 0; i < GetNumberOfPlayersRight(); i++)
+            {
+                List<int> winningSpaces = GetWinningSpaces();
+                int winningSpace = winningSpaces.Max();
+                _lightController.TurnOnLight(winningSpace + stepsToWin + i);
+            }
+        }
+
         public void AddPlayerTeamLeft()
         {
             int currentNumberOfPlayers = GetNumberOfPlayersLeft();
@@ -55,13 +79,10 @@ namespace LightController.Games
                 throw new TeamIsFullException();
             }
 
-            List<int> winningSpaces = GetWinningSpaces();
-            int position = winningSpaces.Min() - 1 - GetNumberOfPlayersLeft();
             AddPlayer();
-            _lightController.TurnOnLight(position);
             _playerCountLeft++;
+            SetupBoard();
         }
-
 
 
         public void AddPlayerTeamRight()
@@ -72,11 +93,15 @@ namespace LightController.Games
                 throw new TeamIsFullException();
             }
 
-            List<int> winningSpaces = GetWinningSpaces();
-            int position = winningSpaces.Max() + 1 + GetNumberOfPlayersRight();
             AddPlayer();
-            _lightController.TurnOnLight(position);
             _playerCountRight++;
+            SetupBoard();
+        }
+
+        private int GetMaxDistanceToWinningSpace(int teamSize)
+        {
+            int playableSpaces = (_totalSpaces - GetWinningSpaces().Count) / 2;
+            return (int) Math.Ceiling((double) (playableSpaces - teamSize) / 2);
         }
 
         public List<int> GetWinningSpaces()
