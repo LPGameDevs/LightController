@@ -17,8 +17,11 @@ namespace LightController.Games
         private int _playerCount;
         private int _playerCountLeft;
         private int _playerCountRight;
+        private int _playerMovesToLoseLeft;
+        private int _playerMovesToLoseRight;
 
         LightController _lightController;
+        private bool _hasGameStarted;
 
         public TugOfWarGame(int totalSpaces)
         {
@@ -30,7 +33,16 @@ namespace LightController.Games
         public void SetupBoard()
         {
             _lightController.SetLights(_totalSpaces);
-            SetStartingPositions();
+
+            if (!_hasGameStarted)
+            {
+                SetStartingPositions();
+            }
+            else
+            {
+                SetGamePositions();
+            }
+
         }
 
         public LightController GetLightController()
@@ -50,11 +62,10 @@ namespace LightController.Games
 
         private void SetStartingPositions()
         {
-
             int maxTeamSize = Math.Max(GetNumberOfPlayersLeft(), GetNumberOfPlayersRight());
             int maxDistanceToWinningSpace = GetMaxDistanceToWinningSpace(maxTeamSize);
 
-            int stepsToWin = Math.Min(3, maxDistanceToWinningSpace);
+            int stepsToWin = _playerMovesToLoseLeft = _playerMovesToLoseRight = Math.Min(3, maxDistanceToWinningSpace);
 
             for (int i = 0; i < GetNumberOfPlayersLeft(); i++)
             {
@@ -68,6 +79,23 @@ namespace LightController.Games
                 List<int> winningSpaces = GetWinningSpaces();
                 int winningSpace = winningSpaces.Max();
                 _lightController.TurnOnLight(winningSpace + stepsToWin + i);
+            }
+        }
+
+        private void SetGamePositions()
+        {
+            for (int i = 0; i < GetNumberOfPlayersLeft(); i++)
+            {
+                List<int> winningSpaces = GetWinningSpaces();
+                int winningSpace = winningSpaces.Min();
+                _lightController.TurnOnLight(winningSpace - _playerMovesToLoseLeft - i);
+            }
+
+            for (int i = 0; i < GetNumberOfPlayersRight(); i++)
+            {
+                List<int> winningSpaces = GetWinningSpaces();
+                int winningSpace = winningSpaces.Max();
+                _lightController.TurnOnLight(winningSpace + _playerMovesToLoseRight + i);
             }
         }
 
@@ -191,6 +219,8 @@ namespace LightController.Games
 
             if (winner == Team.Left)
             {
+                _playerMovesToLoseLeft++;
+                _playerMovesToLoseRight--;
                 foreach (int player in players)
                 {
                     _lightController.TurnOffLight(player);
@@ -203,6 +233,8 @@ namespace LightController.Games
             }
             else
             {
+                _playerMovesToLoseLeft--;
+                _playerMovesToLoseRight++;
                 foreach (int player in players)
                 {
                     _lightController.TurnOffLight(player);
@@ -213,6 +245,8 @@ namespace LightController.Games
                     _lightController.TurnOnLight(player + 1);
                 }
             }
+
+            _hasGameStarted = true;
         }
 
         public bool IsGameOver()

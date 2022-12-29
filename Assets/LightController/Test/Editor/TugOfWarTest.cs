@@ -350,6 +350,88 @@ namespace LightController.Test
             Assert.AreEqual(true, lightController.IsLightOn(9));
         }
 
+                private static IEnumerable<TestTowInGameJoiningCasesCase> TestTowInGameJoiningCases
+        {
+            get
+            {
+                yield return new TestTowInGameJoiningCasesCase(15,
+                    new LightChecks(new List<LightCheck>()
+                    {
+                        new LightCheck(3,true),
+                        new LightCheck(4,true),
+                        new LightCheck(10,true),
+                    }),
+                    new LightChecks(new List<LightCheck>()
+                    {
+                        new LightCheck(2,true),
+                        new LightCheck(3,true),
+                        new LightCheck(9,true),
+                    }),
+                    new LightChecks(new List<LightCheck>()
+                    {
+                        new LightCheck(2,true),
+                        new LightCheck(3,true),
+                        new LightCheck(9,true),
+                        new LightCheck(10,true),
+                        new LightCheck(11,true),
+                    }),
+                    new LightChecks(new List<LightCheck>()
+                    {
+                        new LightCheck(3,true),
+                        new LightCheck(4,true),
+                        new LightCheck(10,true),
+                        new LightCheck(11,true),
+                        new LightCheck(12,true),
+                    })
+                );
+
+            }
+        }
+
+
+        [Test, TestCaseSource(nameof(TestTowInGameJoiningCases))]
+        public void TestTowInGameJoining(TestTowInGameJoiningCasesCase testCase)
+        {
+            // Start the game.
+            TugOfWarGame game = new TugOfWarGame(testCase.totalLights);
+            LightController lightController = game.GetLightController();
+
+            // Add players.
+            game.AddPlayerTeamLeft();
+            game.AddPlayerTeamLeft();e
+            game.AddPlayerTeamRight();
+
+            foreach (LightCheck lightCheck in testCase.startingPositions.lightChecks)
+            {
+                Assert.AreEqual(lightCheck.IsOn, lightController.IsLightOn(lightCheck.Position));
+            }
+
+            // Move.
+            game.Move();
+
+            foreach (LightCheck lightCheck in testCase.positionsAfterMove.lightChecks)
+            {
+                Assert.AreEqual(lightCheck.IsOn, lightController.IsLightOn(lightCheck.Position));
+            }
+
+            // Add more players.
+            game.AddPlayerTeamRight();
+            game.AddPlayerTeamRight();
+
+            foreach (LightCheck lightCheck in testCase.positionsAfterJoin.lightChecks)
+            {
+                Assert.AreEqual(lightCheck.IsOn, lightController.IsLightOn(lightCheck.Position));
+            }
+
+            // Move.
+            game.Move();
+
+            foreach (LightCheck lightCheck in testCase.positionsAfterJoinAndMove.lightChecks)
+            {
+                Assert.AreEqual(lightCheck.IsOn, lightController.IsLightOn(lightCheck.Position));
+            }
+        }
+
         [Test]
         public void TestTowWin()
         {
@@ -383,6 +465,23 @@ namespace LightController.Test
                 this.totalLights = totalLights;
                 this.lightChecks = lightChecks;
                 this.playersWillFit = playersWillFit;
+            }
+        }
+        public struct TestTowInGameJoiningCasesCase
+        {
+            public int totalLights;
+            public LightChecks startingPositions;
+            public LightChecks positionsAfterMove;
+            public LightChecks positionsAfterJoin;
+            public LightChecks positionsAfterJoinAndMove;
+
+            public TestTowInGameJoiningCasesCase(int totalLights, LightChecks startingPositions, LightChecks positionsAfterMove, LightChecks positionsAfterJoin, LightChecks positionsAfterJoinAndMove)
+            {
+                this.totalLights = totalLights;
+                this.startingPositions = startingPositions;
+                this.positionsAfterMove = positionsAfterMove;
+                this.positionsAfterJoin = positionsAfterJoin;
+                this.positionsAfterJoinAndMove = positionsAfterJoinAndMove;
             }
         }
 
